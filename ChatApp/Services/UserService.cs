@@ -125,5 +125,77 @@ namespace ChatApp.Services
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
         }
+        public object GetUser(Guid id, string FirstName, string Email, long phoneNo)
+        {
+            try
+            {
+                var users = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) && (x.PhoneNo == phoneNo || phoneNo == 0) && (x.FirstName == FirstName || FirstName == string.Empty)&&
+                (x.Email == Email || Email == string.Empty)).Select(x=>x);
+                if (users.Count() == 0)
+                {
+                    response.StatusCode = 400;
+                    response.Message = "User Not Found";
+                    return response;
+                }
+                response.Data= users;
+                return response;
+            }
+            catch(Exception ex)
+            {
+                response.StatusCode = 500;
+                response.Message = ex.Message;
+                return response;
+            }
+        }
+        public object UpdateUser(Guid id, string Email, UpdateUser user)
+        {
+            try
+            {
+                var _user = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) && 
+                (x.Email == Email || Email == string.Empty)).Select(x => x);
+                if (_user.Count() == 0)
+                {
+                    response.StatusCode = 400;
+                    response.Message = "User Not Found";
+                    return response;
+                }
+                _user.First().DateOfBirth = user.DateOfBirth;
+                _user.First().PhoneNo = user.PhoneNo;
+                _user.First().FirstName = user.FirstName;
+                _user.First().LastName = user.LastName;
+                _user.First().Updated = DateTime.Now;
+                response.Data = _user;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.Message = ex.Message;
+                return response;
+            }
+        }
+        public object DeleteUser(Guid id, string Email)
+        {
+            try
+            {
+                var _user = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) &&
+                (x.Email == Email || Email == string.Empty)).Select(x => x);
+                if (_user.Count() == 0)
+                {
+                    response.StatusCode = 400;
+                    response.Message = "User Not Found";
+                    return response;
+                }
+                _user.First().IsDeleted = true;
+                response.Data = _user;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.Message = ex.Message;
+                return response;
+            }
+        }
     }
 }

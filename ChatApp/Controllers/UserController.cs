@@ -18,7 +18,24 @@ namespace ChatApp.Controllers
         {
                 this.userService = userservice;
         }
-        
+        [HttpGet]
+        public IActionResult GetUser(Guid id,string FirstName, string Email,long phoneNo)
+        {
+            var response = userService.GetUser(id,FirstName,Email,phoneNo);
+            return Ok(response);
+        }
+        [HttpPut]
+        public IActionResult UpdateUser(Guid id, string Email,UpdateUser user)
+        {
+            var response = userService.UpdateUser(id, Email,user);
+            return Ok(response);
+        }
+        [HttpDelete]
+        public IActionResult DeleteUser(Guid id, string Email)
+        {
+            var response = userService.DeleteUser(id, Email);
+            return Ok(response);
+        }
         [HttpPost]
         [Route("Registration")]
         public IActionResult RegisterUser(AddUser user)
@@ -33,7 +50,7 @@ namespace ChatApp.Controllers
             var response = userService.LoginUser(model);
             return Ok(response);
         }
-        public async Task Login()
+        /*public async Task Login()
         {
             await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties()
             {
@@ -51,6 +68,6 @@ namespace ChatApp.Controllers
                 claim.Value
             });
             return Ok(claims);
-        }
+        }*/
     }
 }

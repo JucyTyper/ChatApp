@@ -6,5 +6,8 @@ namespace ChatApp.Services
     {
         public object CreateUser(AddUser user);
         public object LoginUser(LoginModel user);
+        public object GetUser(Guid id, string FirstName, string Email, long phoneNo);
+        public object UpdateUser(Guid id,string email,UpdateUser user);
+        public object DeleteUser(Guid id, string email);
     }
 }
