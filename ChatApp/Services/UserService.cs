@@ -40,9 +40,13 @@ namespace ChatApp.Services
                 RegisterPassword(userModel, user.Password);
                 _db.users.Add(userModel);
                 _db.SaveChanges();
+                var Login = new LoginModel();
+                Login.Email = user.Email;
+                Login.Password= user.Password;
+                var token = CreateToken(Login);
                 response.StatusCode=200;
                 response.Message = "User added Successfully";
-                response.Data = userModel;
+                response.Data = token;
                 return response;
             }
             catch(Exception ex) 
@@ -107,7 +111,7 @@ namespace ChatApp.Services
                 return computedHash.SequenceEqual(passwordHash);
             }
         }
-        private string CreateToken(LoginModel user) 
+        public string CreateToken(LoginModel user) 
         { 
             List<Claim> claims = new List<Claim>
             {
@@ -125,16 +129,17 @@ namespace ChatApp.Services
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
         }
-        public object GetUser(Guid id, string FirstName, string Email, long phoneNo)
+        public object GetUser(Guid id, string FirstName, string Email)
         {
             try
             {
-                var users = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) && (x.PhoneNo == phoneNo || phoneNo == 0) && (x.FirstName == FirstName || FirstName == string.Empty)&&
-                (x.Email == Email || Email == string.Empty)).Select(x=>x);
+                var users = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) && (x.FirstName == FirstName || FirstName == null)&&
+                (x.Email == Email || Email == null)).Select(x=> new {x.UserId,x.Email,x.FirstName,x.LastName,x.DateOfBirth,x.Created,x.LastActive,x.PhoneNo,x.Updated});
                 if (users.Count() == 0)
                 {
                     response.StatusCode = 400;
                     response.Message = "User Not Found";
+                    response.Data= users;
                     return response;
                 }
                 response.Data= users;
@@ -152,18 +157,23 @@ namespace ChatApp.Services
             try
             {
                 var _user = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) && 
-                (x.Email == Email || Email == string.Empty)).Select(x => x);
+                (x.Email == Email || Email == null)).Select(x => x);
                 if (_user.Count() == 0)
                 {
                     response.StatusCode = 400;
                     response.Message = "User Not Found";
                     return response;
                 }
-                _user.First().DateOfBirth = user.DateOfBirth;
-                _user.First().PhoneNo = user.PhoneNo;
-                _user.First().FirstName = user.FirstName;
-                _user.First().LastName = user.LastName;
+                if(user.DateOfBirth!= DateTime.MinValue)
+                    _user.First().DateOfBirth = user.DateOfBirth;
+                if (user.PhoneNo != -1)
+                    _user.First().PhoneNo = user.PhoneNo;
+                if(user.FirstName != string.Empty)
+                    _user.First().FirstName = user.FirstName;
+                if (user.LastName != string.Empty)
+                    _user.First().LastName = user.LastName;
                 _user.First().Updated = DateTime.Now;
+                _db.SaveChanges();
                 response.Data = _user;
                 return response;
             }
@@ -179,15 +189,16 @@ namespace ChatApp.Services
             try
             {
                 var _user = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) &&
-                (x.Email == Email || Email == string.Empty)).Select(x => x);
+                (x.Email == Email || Email == null)).Select(x => x);
                 if (_user.Count() == 0)
                 {
                     response.StatusCode = 400;
                     response.Message = "User Not Found";
                     return response;
                 }
+
                 _user.First().IsDeleted = true;
-                response.Data = _user;
+                _db.SaveChanges();
                 return response;
             }
             catch (Exception ex)
@@ -196,6 +207,61 @@ namespace ChatApp.Services
                 response.Message = ex.Message;
                 return response;
             }
+        }
+        public object ForgetPassUser(ForgetPassword cred)
+        {
+            try
+            {
+                var _user = _db.users.Where(x =>
+                 (x.Email == cred.Email )).Select(x => x);
+                if (_user.Count() == 0)
+                {
+                    response.StatusCode = 400;
+                    response.Message = "User Not Found";
+                    return response;
+                }
+                RegisterPassword(_user.First(), cred.Password);
+                _db.SaveChanges();
+                response.Message = "password Changed";
+                return response;
+            }
+            catch(Exception ex)
+            {
+                response.StatusCode = 500;
+                response.Message = ex.Message;
+                return response;
+            }
+        }
+        public object ResetPassUser(ResetPassword cred)
+        {
+            try
+            {
+                var _user = _db.users.Where(x =>
+                 (x.Email == cred.Email)).Select(x => x);
+                if (_user.Count() == 0)
+                {
+                    response.StatusCode = 404;
+                    response.Message = "User Not Found";
+                    return response;
+                }
+                if (!VerifyPasswordHash(cred.OldPassword, _user.First().Password))
+                {
+                    response.StatusCode = 400;
+                    response.Message = "wrong Old Password";
+                    return response;
+                }
+                RegisterPassword(_user.First(), cred.NewPassword);
+                _db.SaveChanges();
+                response.Message = "password Changed";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.Message = ex.Message;
+                return response;
+            }
+
         }
     }
 }

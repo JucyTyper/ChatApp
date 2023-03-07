@@ -1,8 +1,10 @@
 ﻿using ChatApp.Models;
 using ChatApp.Services;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,18 +21,21 @@ namespace ChatApp.Controllers
                 this.userService = userservice;
         }
         [HttpGet]
-        public IActionResult GetUser(Guid id,string FirstName, string Email,long phoneNo)
+        [Authorize]
+        public IActionResult GetUser(Guid id,string? FirstName, string? Email)
         {
-            var response = userService.GetUser(id,FirstName,Email,phoneNo);
+            var response = userService.GetUser(id,FirstName,Email);
             return Ok(response);
         }
         [HttpPut]
+        [Authorize]
         public IActionResult UpdateUser(Guid id, string Email,UpdateUser user)
         {
             var response = userService.UpdateUser(id, Email,user);
             return Ok(response);
         }
         [HttpDelete]
+        [Authorize]
         public IActionResult DeleteUser(Guid id, string Email)
         {
             var response = userService.DeleteUser(id, Email);
@@ -44,6 +49,7 @@ namespace ChatApp.Controllers
             return Ok(response);
         }
         [HttpPost]
+        [Authorize]
         [Route("Login")]
         public IActionResult Login(LoginModel model)
         {
@@ -69,5 +75,33 @@ namespace ChatApp.Controllers
             });
             return Ok(claims);
         }*/
+        [HttpPost]
+        [Authorize]
+        [Route("ForgetPassword")]
+        public IActionResult ForgetPassword(ForgetPassword repass)
+        {
+            var response = userService.ForgetPassUser(repass);
+            return Ok(response);
+        }
+        [HttpPost]
+        [Authorize]
+        [Route("ResetPassword")]
+        public IActionResult ResetPassword(ResetPassword repass)
+        {
+            var response = userService.ResetPassUser(repass);
+            return Ok(response);
+        }
+        [HttpPost]
+        [Route("GoogleAuth")]
+        public async Task<IActionResult> Test(string Token)
+        {
+            var GoogleUser = await GoogleJsonWebSignature.ValidateAsync(Token);
+            var user = new LoginModel();
+            user.Email = GoogleUser.Email;
+            user.Password = null;
+            var response = new ResponseModel();
+            response.Data = userService.CreateToken(user);
+            return Ok(response);
+        }
     }
 }
