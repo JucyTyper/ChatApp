@@ -37,7 +37,7 @@ namespace ChatApp.Controllers
         }
         [HttpPost]
         [Route("ForgetPassword")]
-        public async Task<IActionResult> ForgetPasssword(ForgetPasswordMails mail)
+        public IActionResult ForgetPasssword(ForgetPasswordMails mail)
         {
             var response = passwordService.ForgetPassword(mail);
             return Ok(response);

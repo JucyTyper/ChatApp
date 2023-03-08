@@ -40,14 +40,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme
             ValidateAudience = false
         };
     });
-/*builder.Services.AddAuthentication()
-   .AddGoogle(options =>
-   {
-       IConfigurationSection googleAuthNSection =
-       config.GetSection("Authentication:Google");
-       options.ClientId = "83499501732-0rcfo4ffhe5m02cjru0rb19m50fa8sl7.apps.googleusercontent.com";
-       options.ClientSecret = "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";
-   });*/
+
 builder.Services.AddDbContext<ChatAppDatabase>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ChatAppDatabaseConnectionString")));
 builder.Services.AddCors(options => options.AddPolicy(name: "CorsPolicy",
     policy =>
@@ -57,6 +50,8 @@ builder.Services.AddCors(options => options.AddPolicy(name: "CorsPolicy",
     ));
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<ILoginService, LoginService>();
 
 
 var app = builder.Build();

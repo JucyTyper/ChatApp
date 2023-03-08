@@ -33,12 +33,7 @@ namespace ChatApp.Controllers
         [Route("GoogleAuth")]
         public async Task<IActionResult> Test(string Token)
         {
-            var GoogleUser = await GoogleJsonWebSignature.ValidateAsync(Token);
-            var user = new LoginModel();
-            user.Email = GoogleUser.Email;
-            user.Password = null;
-            var response = new ResponseModel();
-            response.Data = loginService.CreateToken(user);
+            var response = loginService.GoogleAuth(Token);
             return Ok(response);
         }
     }

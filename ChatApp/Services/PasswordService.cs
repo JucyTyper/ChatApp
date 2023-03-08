@@ -4,6 +4,9 @@ using System.Net.Mail;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace ChatApp.Services
 {
@@ -104,6 +107,20 @@ namespace ChatApp.Services
                 response.Message = "Email Not Found";
                 return response;
             }
+            string token = CreateToken(mail.email);
+            // Create a new UriBuilder object with the original link
+            UriBuilder builder = new UriBuilder(mail.url);
+
+            // Encode the JWT token as a URL-safe string
+            string encodedToken = System.Net.WebUtility.UrlEncode(token);
+
+            // Add the encoded JWT token as a query string parameter
+            builder.Query = "token=" + encodedToken;
+
+            // Get the modified link as a string
+            string modifiedLink = builder.ToString();
+            Console.WriteLine(modifiedLink);
+
             MailMessage message = new MailMessage();
             // set the sender and recipient email addresses
             message.From = new MailAddress("ajay.joshi@chatapp.chicmic.co.in");
@@ -111,7 +128,7 @@ namespace ChatApp.Services
 
             // set the subject and body of the email
             message.Subject = "Verify your account";
-            message.Body = "Please verify your reset password attempt. Your one time link for verification is " + mail.url;
+            message.Body = "Please verify your reset password attempt. Your one time link for verification is " + modifiedLink;
 
             // create a new SmtpClient object
             SmtpClient client = new SmtpClient();
@@ -128,6 +145,24 @@ namespace ChatApp.Services
             response.Message = "Verification Email Sent";
             response.Data = string.Empty;
             return response;
+        }
+        public string CreateToken(string Email)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+
+                new Claim(ClaimTypes.Name,Email)
+            };
+
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration.GetSection("jwt:Key").Value));
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha384Signature);
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: cred
+                );
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return jwt;
         }
     }
 }
