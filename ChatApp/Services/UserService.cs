@@ -71,37 +71,6 @@ namespace ChatApp.Services
 
             return passwordHash;
         }
-        public object LoginUser(LoginModel user)
-        {
-            try
-            {
-                var _user = _db.users.Where(x => x.Email == user.Email).Select(x => x);
-                if (_user.Count() == 0)
-                {
-                    response.StatusCode = 404;
-                    response.Message = "User doesn't Exist";
-                    return response;
-                }
-
-                if (!VerifyPasswordHash(user.Password, _user.First().Password))
-                {
-                    response.StatusCode = 404;
-                    response.Message = "wrong Password";
-                    return response;
-                }
-                var token = CreateToken(user);
-                response.Data = token;
-                return response;
-            }
-            catch(Exception ex)
-            {
-                response.StatusCode = 500;
-                response.Message = ex.Message;
-                return response;
-            }
-           
-
-        }
         private bool VerifyPasswordHash(string password, byte[] passwordHash)
         {
             byte[] salt = Encoding.ASCII.GetBytes(configuration.GetSection("Password:salt").Value!);
@@ -111,8 +80,8 @@ namespace ChatApp.Services
                 return computedHash.SequenceEqual(passwordHash);
             }
         }
-        public string CreateToken(LoginModel user) 
-        { 
+        public string CreateToken(LoginModel user)
+        {
             List<Claim> claims = new List<Claim>
             {
 
@@ -207,61 +176,6 @@ namespace ChatApp.Services
                 response.Message = ex.Message;
                 return response;
             }
-        }
-        public object ForgetPassUser(ForgetPassword cred)
-        {
-            try
-            {
-                var _user = _db.users.Where(x =>
-                 (x.Email == cred.Email )).Select(x => x);
-                if (_user.Count() == 0)
-                {
-                    response.StatusCode = 400;
-                    response.Message = "User Not Found";
-                    return response;
-                }
-                RegisterPassword(_user.First(), cred.Password);
-                _db.SaveChanges();
-                response.Message = "password Changed";
-                return response;
-            }
-            catch(Exception ex)
-            {
-                response.StatusCode = 500;
-                response.Message = ex.Message;
-                return response;
-            }
-        }
-        public object ResetPassUser(ResetPassword cred)
-        {
-            try
-            {
-                var _user = _db.users.Where(x =>
-                 (x.Email == cred.Email)).Select(x => x);
-                if (_user.Count() == 0)
-                {
-                    response.StatusCode = 404;
-                    response.Message = "User Not Found";
-                    return response;
-                }
-                if (!VerifyPasswordHash(cred.OldPassword, _user.First().Password))
-                {
-                    response.StatusCode = 400;
-                    response.Message = "wrong Old Password";
-                    return response;
-                }
-                RegisterPassword(_user.First(), cred.NewPassword);
-                _db.SaveChanges();
-                response.Message = "password Changed";
-                return response;
-            }
-            catch (Exception ex)
-            {
-                response.StatusCode = 500;
-                response.Message = ex.Message;
-                return response;
-            }
-
         }
     }
 }

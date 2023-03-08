@@ -1,6 +1,6 @@
 ﻿namespace ChatApp.Models
 {
-    public class ResetPassword
+    public class ChangePassword
     {
         public string Email { get; set; }
         public string OldPassword { get; set; }
