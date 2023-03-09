@@ -7,6 +7,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Identity;
 
 namespace ChatApp.Services
 {
@@ -21,12 +23,13 @@ namespace ChatApp.Services
             this._db = _db;
             this.configuration = configuration;
         }
-        public object ResetPassUser(ForgetPassword cred)
+        public object ResetPassUser(string Email,ForgetPassword cred)
         {
             try
             {
+               
                 var _user = _db.users.Where(x =>
-                 (x.Email == cred.Email)).Select(x => x);
+                 (x.Email == Email)).Select(x => x);
                 if (_user.Count() == 0)
                 {
                     response.StatusCode = 400;
@@ -59,12 +62,13 @@ namespace ChatApp.Services
 
             return passwordHash;
         }
-        public object ChangePassUser(ChangePassword cred)
+        public object ChangePassUser(string Email,ChangePassword cred)
         {
+            
             try
             {
                 var _user = _db.users.Where(x =>
-                 (x.Email == cred.Email)).Select(x => x);
+                 (x.Email == Email)).Select(x => x);
                 if (_user.Count() == 0)
                 {
                     response.StatusCode = 404;
@@ -107,9 +111,9 @@ namespace ChatApp.Services
                 response.Message = "Email Not Found";
                 return response;
             }
-            string token = CreateToken(mail.email);
+            string token = CreateToken(mail.email,"Password");
             // Create a new UriBuilder object with the original link
-            UriBuilder builder = new UriBuilder(mail.url);
+            UriBuilder builder = new UriBuilder(mail.urldirect);
 
             // Encode the JWT token as a URL-safe string
             string encodedToken = System.Net.WebUtility.UrlEncode(token);
@@ -146,12 +150,13 @@ namespace ChatApp.Services
             response.Data = string.Empty;
             return response;
         }
-        public string CreateToken(string Email)
+        public string CreateToken(string Email,string role)
         {
             List<Claim> claims = new List<Claim>
             {
 
-                new Claim(ClaimTypes.Name,Email)
+                new Claim(ClaimTypes.Name,Email),
+                new Claim(ClaimTypes.Role,role)
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration.GetSection("jwt:Key").Value));

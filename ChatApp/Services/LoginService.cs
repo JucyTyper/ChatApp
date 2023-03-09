@@ -64,9 +64,9 @@ namespace ChatApp.Services
         public string CreateToken(LoginModel user)
         {
             List<Claim> claims = new List<Claim>
-            {
-
-                new Claim(ClaimTypes.Name,user.Email)
+            { 
+                new Claim(ClaimTypes.Name,user.Email),
+                new Claim(ClaimTypes.Role ,"Login")
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration.GetSection("jwt:Key").Value));
@@ -90,7 +90,7 @@ namespace ChatApp.Services
                     var Log = new LoginModel();
                     Log.Email = GoogleUser.Email;
                     Log.Password = null;
-                    var Authtoken = CreateToken(Log);
+                    string Authtoken = CreateToken(Log);
                     response.Data = Authtoken;
                     return response;
                 }
@@ -104,8 +104,9 @@ namespace ChatApp.Services
                 var Login = new LoginModel();
                 Login.Email = user.Email;
                 Login.Password = null;
-                var token = CreateToken(Login);
+                string token = CreateToken(Login);
                 response.Data= token;
+                Console.WriteLine(token);
                 return response;
             }
             catch(Exception ex)

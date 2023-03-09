@@ -21,21 +21,21 @@ namespace ChatApp.Controllers
                 this.userService = userservice;
         }
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Login")]
         public IActionResult GetUser(Guid id,string? FirstName, string? Email)
         {
             var response = userService.GetUser(id,FirstName,Email);
             return Ok(response);
         }
         [HttpPut]
-        [Authorize]
+        [Authorize(Roles = "Login")]
         public IActionResult UpdateUser(Guid id, string Email,UpdateUser user)
         {
             var response = userService.UpdateUser(id, Email,user);
             return Ok(response);
         }
         [HttpDelete]
-        [Authorize]
+        [Authorize(Roles = "Login")]
         public IActionResult DeleteUser(Guid id, string Email)
         {
             var response = userService.DeleteUser(id, Email);

@@ -2,7 +2,7 @@
 {
     public class ForgetPasswordMails
     {
-        public string url { get; set; }
+        public string urldirect { get; set; }
         public string email { get; set; }
     }
 }

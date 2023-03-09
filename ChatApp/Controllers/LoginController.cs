@@ -31,9 +31,9 @@ namespace ChatApp.Controllers
         }
         [HttpPost]
         [Route("GoogleAuth")]
-        public async Task<IActionResult> Test(string Token)
+        public async Task<IActionResult> Test(GoogleToken Token)
         {
-            var response = loginService.GoogleAuth(Token);
+            var response = loginService.GoogleAuth(Token.Token);
             return Ok(response);
         }
     }

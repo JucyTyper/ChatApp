@@ -19,7 +19,7 @@ namespace ChatApp.Services
             try
             {
                 string ImageName = Email + " " + DateTime.Now.Hour + "-" + DateTime.Now.Minute + " " + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + imageFile.Image.FileName;
-                string path = "C:\\Users\\Ajay\\Source\\Repos\\JucyTyper\\ChatApp\\ChatApp\\Assets\\";
+                string path = "C:\\Users\\ChicMic\\source\\repos\\ChatApp\\ChatApp\\Assets\\";
                 var filestream = System.IO.File.Create(path + ImageName);
                 imageFile.Image.CopyTo(filestream);
                 filestream.Flush();

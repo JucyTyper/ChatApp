@@ -36,8 +36,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes
             (config.GetSection("jwt:Key").Value)),
+            ValidateLifetime = true,
+            ValidateAudience = false,
             ValidateIssuer = false,
-            ValidateAudience = false
+            ClockSkew = TimeSpan.Zero
+
         };
     });
 
@@ -52,6 +55,7 @@ builder.Services.AddCors(options => options.AddPolicy(name: "CorsPolicy",
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
 
 var app = builder.Build();

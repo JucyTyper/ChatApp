@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
 using System.Net;
+using System.Security.Claims;
 
 namespace ChatApp.Controllers
 {
@@ -20,19 +21,23 @@ namespace ChatApp.Controllers
             this.passwordService = passwordservice;
         }
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Password")]
         [Route("ResetPassword")]
         public IActionResult ResetPassword(ForgetPassword repass)
         {
-            var response = passwordService.ResetPassUser(repass);
+            var user = HttpContext.User;
+            var email = user.FindFirst(ClaimTypes.Name)?.Value;
+            var response = passwordService.ResetPassUser(email,repass);
             return Ok(response);
         }
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Login")]
         [Route("ChangePassword")]
         public IActionResult ChangePassword(ChangePassword repass)
         {
-            var response = passwordService.ChangePassUser(repass);
+            var user = HttpContext.User;
+            var email = user.FindFirst(ClaimTypes.Name)?.Value;
+            var response = passwordService.ChangePassUser(email,repass);
             return Ok(response);
         }
         [HttpPost]
