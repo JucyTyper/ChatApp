@@ -15,6 +15,8 @@ namespace ChatApp.Services
     public class PasswordService : IPasswordService
     {
         ResponseModel response = new ResponseModel();
+        ResponseModel2 response2 = new ResponseModel2();
+        UserResponse DataOut = new UserResponse();
         private readonly ChatAppDatabase _db;
         private readonly IConfiguration configuration;
 
@@ -32,9 +34,10 @@ namespace ChatApp.Services
                  (x.Email == Email)).Select(x => x);
                 if (_user.Count() == 0)
                 {
-                    response.StatusCode = 400;
-                    response.Message = "User Not Found";
-                    return response;
+                    response2.StatusCode = 400;
+                    response2.Message = "User Not Found";
+                    response2.IsSuccess = false;
+                    return response2;
                 }
                 RegisterPassword(_user.First(), cred.Password);
                 _db.SaveChanges();
@@ -43,9 +46,10 @@ namespace ChatApp.Services
             }
             catch (Exception ex)
             {
-                response.StatusCode = 500;
-                response.Message = ex.Message;
-                return response;
+                response2.StatusCode = 500;
+                response2.Message = ex.Message;
+                response2.IsSuccess = false;
+                return response2;
             }
         }
         private void RegisterPassword(UserModel user, string Password)
@@ -71,26 +75,31 @@ namespace ChatApp.Services
                  (x.Email == Email)).Select(x => x);
                 if (_user.Count() == 0)
                 {
-                    response.StatusCode = 404;
-                    response.Message = "User Not Found";
-                    return response;
+                    response2.StatusCode = 404;
+                    response2.Message = "User Not Found";
+                    response2.IsSuccess = false;
+                    return response2;
                 }
                 if (!VerifyPasswordHash(cred.OldPassword, _user.First().Password))
                 {
-                    response.StatusCode = 400;
-                    response.Message = "wrong Old Password";
-                    return response;
+                    response2.StatusCode = 400;
+                    response2.Message = "wrong Old Password"; 
+                    response2.IsSuccess = false;
+                    return response2;
                 }
                 RegisterPassword(_user.First(), cred.NewPassword);
                 _db.SaveChanges();
-                response.Message = "password Changed";
-                return response;
+                response2.IsSuccess = true;
+                response2.StatusCode = 200;
+                response2.Message = "password Changed";
+                return response2;
             }
             catch (Exception ex)
             {
-                response.StatusCode = 500;
-                response.Message = ex.Message;
-                return response;
+                response2.StatusCode = 500;
+                response2.Message = ex.Message;
+                response2.IsSuccess = false;
+                return response2;
             }
         }
         private bool VerifyPasswordHash(string password, byte[] passwordHash)
@@ -107,9 +116,10 @@ namespace ChatApp.Services
             var _user = _db.users.Where(x => x.Email == mail.email).Select(x => x);
             if (_user.Count() == 0)
             {
-                response.StatusCode = 404;
-                response.Message = "Email Not Found";
-                return response;
+                response2.StatusCode = 404;
+                response2.Message = "Email Not Found";
+                response2.IsSuccess = false;
+                return response2;
             }
             string token = CreateToken(mail.email,"Password");
             // Create a new UriBuilder object with the original link
@@ -123,7 +133,6 @@ namespace ChatApp.Services
 
             // Get the modified link as a string
             string modifiedLink = builder.ToString();
-            Console.WriteLine(modifiedLink);
 
             MailMessage message = new MailMessage();
             // set the sender and recipient email addresses
@@ -145,10 +154,10 @@ namespace ChatApp.Services
             // send the email
             client.Send(message);
 
-            response.StatusCode = 200;
-            response.Message = "Verification Email Sent";
-            response.Data = string.Empty;
-            return response;
+            response2.StatusCode = 200;
+            response2.Message = "Verification Email Sent";
+            response2.IsSuccess = true;
+            return response2;
         }
         public string CreateToken(string Email,string role)
         {
@@ -163,11 +172,23 @@ namespace ChatApp.Services
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha384Signature);
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddMinutes(10),
                 signingCredentials: cred
                 );
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
+        }
+        public ResponseModel2 CheckToken(string token)
+        {
+            var tokenCheck = _db.blackListTokens.Where(x => x.token == token.ToString()).Select(x=>x);
+            if (tokenCheck.Count() != 0)
+            {
+                response2.StatusCode = 400;
+                response2.Message = "Invalid Token";
+                response2.IsSuccess = false;
+                return response2;
+            }
+            return response2 ;
         }
     }
 }

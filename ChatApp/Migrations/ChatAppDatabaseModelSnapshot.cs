@@ -22,6 +22,21 @@ namespace ChatApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ChatApp.Models.BlackListToken", b =>
+                {
+                    b.Property<Guid>("tokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("tokenId");
+
+                    b.ToTable("blackListTokens");
+                });
+
             modelBuilder.Entity("ChatApp.Models.UserModel", b =>
                 {
                     b.Property<Guid>("UserId")

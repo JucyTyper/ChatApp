@@ -13,6 +13,8 @@ namespace ChatApp.Services
     public class LoginService : ILoginService
     {
         ResponseModel response = new ResponseModel();
+        ResponseModel2 response2 = new ResponseModel2();
+        UserResponse DataOut = new UserResponse();
         private readonly ChatAppDatabase _db;
         private readonly IConfiguration configuration;
 
@@ -28,26 +30,33 @@ namespace ChatApp.Services
                 var _user = _db.users.Where(x => x.Email == user.Email).Select(x => x);
                 if (_user.Count() == 0)
                 {
-                    response.StatusCode = 404;
-                    response.Message = "User doesn't Exist";
-                    return response;
+                    response2.StatusCode = 404;
+                    response2.Message = "User doesn't Exist";
+                    response2.IsSuccess = false;
+                    return response2;
                 }
 
                 if (!VerifyPasswordHash(user.Password, _user.First().Password))
                 {
-                    response.StatusCode = 404;
-                    response.Message = "wrong Password";
-                    return response;
+                    response2.StatusCode = 404;
+                    response2.Message = "wrong Password";
+                    response2.IsSuccess=false;
+                    return response2;
                 }
                 var token = CreateToken(user);
-                response.Data = token;
+                DataOut.Token = token;
+                DataOut.Name = _user.First().FirstName;
+                DataOut.Email = _user.First().Email;
+                DataOut.UserID = _user.First().UserId;
+                response.Data = DataOut;
                 return response;
             }
             catch (Exception ex)
             {
-                response.StatusCode = 500;
-                response.Message = ex.Message;
-                return response;
+                response2.StatusCode = 500;
+                response2.Message = ex.Message;
+                response2.IsSuccess = false;
+                return response2;
             }
 
 
@@ -79,42 +88,90 @@ namespace ChatApp.Services
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
         }
-        public async Task<object> GoogleAuth(string Token)
+        public object GoogleAuth(string Token)
         {
             try
             {
-                var GoogleUser =  await GoogleJsonWebSignature.ValidateAsync(Token);
-                var _user = _db.users.Where(x => x.Email ==GoogleUser.Email).Select(x => x);
+                var GoogleUser =  GoogleJsonWebSignature.ValidateAsync(Token);
+                //var _user = _db.users.Where(x => x.Email == GoogleUser.Email).Select(x => new {x.Email,x.UserId,x.FirstName,x.LastName});
+                var _user = _db.users.Where(x => x.Email == GoogleUser.Result.Email ).Select(x => new { x.UserId, x.Email, x.FirstName, x.LastName, x.DateOfBirth, x.Created, x.LastActive, x.PhoneNo, x.Updated });
+                
                 if (_user.Count() != 0)
                 {
                     var Log = new LoginModel();
-                    Log.Email = GoogleUser.Email;
+                    Log.Email = GoogleUser.Result.Email;
+                    Console.WriteLine(Log.Email);
                     Log.Password = null;
                     string Authtoken = CreateToken(Log);
-                    response.Data = Authtoken;
+                    DataOut.Token = Authtoken;
+                    DataOut.Name = GoogleUser.Result.GivenName;
+                    DataOut.Email = GoogleUser.Result.Email;
+                    DataOut.UserID = _user.First().UserId;
+                    response.Message = "user Logged in";
+                    response.IsSuccess = true;
+                    response.Data = DataOut;
                     return response;
                 }
                 var user = new UserModel();
-                user.Email = GoogleUser.Email;
-                user.Password = null;
-                user.FirstName = GoogleUser.GivenName;
-                user.LastName = GoogleUser.FamilyName;
+                user.Email = GoogleUser.Result.Email;
+                user.Password = CreatePasswordHash("temp");
+                user.FirstName = GoogleUser.Result.GivenName;
+                user.LastName = GoogleUser.Result.FamilyName;
                 user.DateOfBirth = DateTime.MinValue;
-                user.PhoneNo = -1;
+                user.PhoneNo = 0;
                 var Login = new LoginModel();
                 Login.Email = user.Email;
                 Login.Password = null;
                 string token = CreateToken(Login);
-                response.Data= token;
-                Console.WriteLine(token);
+                DataOut.Token = token;
+                DataOut.Name = user.FirstName;
+                DataOut.Email = user.Email;
+                DataOut.UserID = user.UserId;
+                response.Data= DataOut;
+                _db.users.Add(user);
+                _db.SaveChanges();
                 return response;
             }
             catch(Exception ex)
             {
-                response.StatusCode = 500;
-                response.Message = ex.Message;
-                return response;
+                response2.StatusCode = 500;
+                response2.Message = ex.StackTrace;
+                response2.IsSuccess = false;
+                return response2;
             }
+        }
+        private byte[] CreatePasswordHash(string password)
+        {
+            byte[] salt = Encoding.ASCII.GetBytes(configuration.GetSection("Password:salt").Value!);
+            var hmac = new HMACSHA512(salt);
+            var passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+
+            return passwordHash;
+        }
+        public object? CheckToken(string token)
+        {
+            var tokenCheck = _db.blackListTokens.Where(x=> x.token== token).Count();  
+            if(tokenCheck != 0) 
+            {
+                response.StatusCode = 400;
+                response.Message = "Invalid Token";
+                response.IsSuccess = false;
+                return response2;
+            }
+            return null;
+        }
+        public object LogOut(string token)
+        {
+            var bLtoken = new BlackListToken
+            {
+                token= token,
+            };
+            _db.blackListTokens.Add(bLtoken);
+            _db.SaveChanges();
+            response2.StatusCode = 200;
+            response2.Message = "Logged Out";
+            response2.IsSuccess = true;
+            return response2;
         }
     }
 }

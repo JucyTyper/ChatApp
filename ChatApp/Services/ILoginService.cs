@@ -6,6 +6,8 @@ namespace ChatApp.Services
     {
         public object LoginUser(LoginModel user);
         public string CreateToken(LoginModel user);
-        public Task<object> GoogleAuth(string Token);
+        public object GoogleAuth(string Token);
+        public object CheckToken(string token);
+        public object LogOut(string token);
     }
 }

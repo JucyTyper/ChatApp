@@ -6,11 +6,23 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ChatApp.Migrations
 {
     /// <inheritdoc />
-    public partial class hi : Migration
+    public partial class @try : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "blackListTokens",
+                columns: table => new
+                {
+                    tokenId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    token = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_blackListTokens", x => x.tokenId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "users",
                 columns: table => new
@@ -37,6 +49,9 @@ namespace ChatApp.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "blackListTokens");
+
             migrationBuilder.DropTable(
                 name: "users");
         }

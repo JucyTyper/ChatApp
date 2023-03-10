@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatApp.Migrations
 {
     [DbContext(typeof(ChatAppDatabase))]
-    [Migration("20230306075138_hi")]
-    partial class hi
+    [Migration("20230310092743_try")]
+    partial class @try
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,21 @@ namespace ChatApp.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("ChatApp.Models.BlackListToken", b =>
+                {
+                    b.Property<Guid>("tokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("tokenId");
+
+                    b.ToTable("blackListTokens");
+                });
 
             modelBuilder.Entity("ChatApp.Models.UserModel", b =>
                 {

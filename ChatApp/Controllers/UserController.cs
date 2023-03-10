@@ -24,6 +24,12 @@ namespace ChatApp.Controllers
         [Authorize(Roles = "Login")]
         public IActionResult GetUser(Guid id,string? FirstName, string? Email)
         {
+            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            ResponseModel2 temp = userService.CheckToken(token);
+            if (temp.IsSuccess == false)
+            {
+                return Ok(temp);
+            }
             var response = userService.GetUser(id,FirstName,Email);
             return Ok(response);
         }
@@ -31,6 +37,12 @@ namespace ChatApp.Controllers
         [Authorize(Roles = "Login")]
         public IActionResult UpdateUser(Guid id, string Email,UpdateUser user)
         {
+            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            ResponseModel2 temp = userService.CheckToken(token);
+            if (temp.IsSuccess == false)
+            {
+                return Ok(temp);
+            }
             var response = userService.UpdateUser(id, Email,user);
             return Ok(response);
         }
@@ -38,6 +50,12 @@ namespace ChatApp.Controllers
         [Authorize(Roles = "Login")]
         public IActionResult DeleteUser(Guid id, string Email)
         {
+            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            ResponseModel2 temp = userService.CheckToken(token);
+            if (temp.IsSuccess == false)
+            {
+                return Ok(temp);
+            }
             var response = userService.DeleteUser(id, Email);
             return Ok(response);
         }

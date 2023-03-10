@@ -11,6 +11,7 @@ namespace ChatApp.Data
         {
         }
         public DbSet<UserModel> users { get; set; }
+        public DbSet<BlackListToken> blackListTokens { get; set; }
        
     }
 }

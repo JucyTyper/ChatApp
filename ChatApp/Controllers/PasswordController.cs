@@ -25,6 +25,12 @@ namespace ChatApp.Controllers
         [Route("ResetPassword")]
         public IActionResult ResetPassword(ForgetPassword repass)
         {
+            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            ResponseModel2 temp = passwordService.CheckToken(token);
+            if (temp.IsSuccess == false)
+            {
+                return Ok(temp);
+            }
             var user = HttpContext.User;
             var email = user.FindFirst(ClaimTypes.Name)?.Value;
             var response = passwordService.ResetPassUser(email,repass);
@@ -35,6 +41,12 @@ namespace ChatApp.Controllers
         [Route("ChangePassword")]
         public IActionResult ChangePassword(ChangePassword repass)
         {
+            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            ResponseModel2 temp = passwordService.CheckToken(token);
+            if (temp.IsSuccess == false)
+            {
+                return Ok(temp);
+            }
             var user = HttpContext.User;
             var email = user.FindFirst(ClaimTypes.Name)?.Value;
             var response = passwordService.ChangePassUser(email,repass);
@@ -44,6 +56,12 @@ namespace ChatApp.Controllers
         [Route("ForgetPassword")]
         public IActionResult ForgetPasssword(ForgetPasswordMails mail)
         {
+            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            ResponseModel2 temp = passwordService.CheckToken(token);
+            if (temp.IsSuccess == false)
+            {
+                return Ok(temp);
+            }
             var response = passwordService.ForgetPassword(mail);
             return Ok(response);
         }
