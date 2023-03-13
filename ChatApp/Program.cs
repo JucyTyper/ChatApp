@@ -1,4 +1,5 @@
 using ChatApp.Data;
+using ChatApp.Hubs;
 using ChatApp.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -43,7 +44,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme
 
         };
     });
-
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors= true;
+});
 builder.Services.AddDbContext<ChatAppDatabase>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ChatAppDatabaseConnectionString")));
 builder.Services.AddCors(options => options.AddPolicy(name: "CorsPolicy",
     policy =>
@@ -71,8 +75,13 @@ app.UseAuthentication();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 
+app.UseRouting();
 app.UseAuthorization();
-
+app.UseEndpoints(endpoints =>
+{
+    app.MapControllers();
+    endpoints.MapHub<ChatHub>("/chatHub");
+});
 app.MapControllers();
 
 app.Run();

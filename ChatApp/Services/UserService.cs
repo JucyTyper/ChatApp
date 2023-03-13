@@ -1,5 +1,6 @@
 ﻿using ChatApp.Data;
 using ChatApp.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -159,11 +160,11 @@ namespace ChatApp.Services
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
         }
-        public object GetUser(Guid id, string FirstName, string Email)
+        public object GetUser(Guid id, string searchString, string Email)
         {
             try
             {
-                var users = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) && (x.FirstName == FirstName || FirstName == null)&&
+                var users = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) && (EF.Functions.Like(x.FirstName,"%"+searchString+"%")|| EF.Functions.Like(x.LastName, "%" + searchString + "%") || searchString == null)&&
                 (x.Email == Email || Email == null)).Select(x=> new {x.UserId,x.Email,x.FirstName,x.LastName,x.DateOfBirth,x.Created,x.LastActive,x.PhoneNo,x.Updated});
                 if (users.Count() == 0)
                 {

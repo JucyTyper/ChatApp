@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ChatApp.Services
 {
@@ -27,6 +28,22 @@ namespace ChatApp.Services
         {
             try
             {
+                string regexPatternEmail = "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$";
+                if (!Regex.IsMatch(user.Email, regexPatternEmail))
+                {
+                    response2.StatusCode = 400;
+                    response2.Message = "Enter Valid Email";
+                    response2.IsSuccess = false;
+                    return response2;
+                }
+                string regexPatternPassword = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
+                if (!Regex.IsMatch(user.Password, regexPatternPassword))
+                {
+                    response2.StatusCode = 400;
+                    response2.Message = "Enter Valid Password";
+                    response2.IsSuccess = false;
+                    return response2;
+                }
                 var _user = _db.users.Where(x => x.Email == user.Email).Select(x => x);
                 if (_user.Count() == 0)
                 {

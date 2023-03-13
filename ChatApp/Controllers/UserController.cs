@@ -22,7 +22,7 @@ namespace ChatApp.Controllers
         }
         [HttpGet]
         [Authorize(Roles = "Login")]
-        public IActionResult GetUser(Guid id,string? FirstName, string? Email)
+        public IActionResult GetUser(Guid id,string? searchString, string? Email)
         {
             string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             ResponseModel2 temp = userService.CheckToken(token);
@@ -30,7 +30,7 @@ namespace ChatApp.Controllers
             {
                 return Ok(temp);
             }
-            var response = userService.GetUser(id,FirstName,Email);
+            var response = userService.GetUser(id,searchString,Email);
             return Ok(response);
         }
         [HttpPut]
