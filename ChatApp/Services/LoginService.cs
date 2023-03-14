@@ -92,7 +92,8 @@ namespace ChatApp.Services
             List<Claim> claims = new List<Claim>
             { 
                 new Claim(ClaimTypes.Name,user.Email),
-                new Claim(ClaimTypes.Role ,"Login")
+                new Claim(ClaimTypes.Role ,"Login"),
+                //new Claim(ClaimTypes.NameIdentifier , Id.ToString())
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration.GetSection("jwt:Key").Value));

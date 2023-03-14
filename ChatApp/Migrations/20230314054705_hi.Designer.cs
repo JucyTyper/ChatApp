@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatApp.Migrations
 {
     [DbContext(typeof(ChatAppDatabase))]
-    [Migration("20230310092743_try")]
-    partial class @try
+    [Migration("20230314054705_hi")]
+    partial class hi
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,70 @@ namespace ChatApp.Migrations
                     b.HasKey("tokenId");
 
                     b.ToTable("blackListTokens");
+                });
+
+            modelBuilder.Entity("ChatApp.Models.ChatModel", b =>
+                {
+                    b.Property<Guid>("chatId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("dateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("isDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("lastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("receiverEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("senderEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("chatId");
+
+                    b.ToTable("chatEntities");
+                });
+
+            modelBuilder.Entity("ChatApp.Models.MessageModel", b =>
+                {
+                    b.Property<Guid>("messageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("chatMapId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("dateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("filePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("receiverEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("senderEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("messageId");
+
+                    b.ToTable("messages");
                 });
 
             modelBuilder.Entity("ChatApp.Models.UserModel", b =>
@@ -83,6 +147,9 @@ namespace ChatApp.Migrations
 
                     b.Property<DateTime>("Updated")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("isOnline")
+                        .HasColumnType("bit");
 
                     b.HasKey("UserId");
 

@@ -41,7 +41,7 @@ namespace ChatApp.Services
                     response2.StatusCode = 400;
                     response2.Message = "Email Already Exist";
                     response2.IsSuccess = false;
-                    return response;
+                    return response2;
                 }
                 TimeSpan ageTimeSpan = DateTime.Now - user.DateOfBirth;
                 int age = (int)(ageTimeSpan.Days / 365.25);

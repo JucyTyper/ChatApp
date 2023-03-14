@@ -37,6 +37,70 @@ namespace ChatApp.Migrations
                     b.ToTable("blackListTokens");
                 });
 
+            modelBuilder.Entity("ChatApp.Models.ChatModel", b =>
+                {
+                    b.Property<Guid>("chatId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("dateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("isDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("lastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("receiverEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("senderEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("chatId");
+
+                    b.ToTable("chatEntities");
+                });
+
+            modelBuilder.Entity("ChatApp.Models.MessageModel", b =>
+                {
+                    b.Property<Guid>("messageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("chatMapId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("dateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("filePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("receiverEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("senderEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("messageId");
+
+                    b.ToTable("messages");
+                });
+
             modelBuilder.Entity("ChatApp.Models.UserModel", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -80,6 +144,9 @@ namespace ChatApp.Migrations
 
                     b.Property<DateTime>("Updated")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("isOnline")
+                        .HasColumnType("bit");
 
                     b.HasKey("UserId");
 

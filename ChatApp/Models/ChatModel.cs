@@ -1,11 +1,15 @@
-﻿namespace ChatApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ChatApp.Models
 {
     public class ChatModel
     {
+        [Key]
         public Guid chatId { get; set; } = Guid.NewGuid();
-        public Guid senderId { get; set; }
-        public Guid receiverId { get; set; }
+        public string senderEmail { get; set; }
+        public string receiverEmail { get; set; }
         public DateTime dateTime { get; set; } = DateTime.Now;
         public bool isDeleted { get; set; } = false;
+        public DateTime lastUpdated { get; set; } = DateTime.Now;
     }
 }

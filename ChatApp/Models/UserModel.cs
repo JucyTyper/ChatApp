@@ -17,6 +17,7 @@ namespace ChatApp.Models
         public DateTime Updated { get; set; } = DateTime.Now;
         public DateTime LastActive { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; } = false;
+        public bool isOnline { get; set; } = false;
         public string ProfileImagePath { get; set; } = string.Empty;
     }
 }

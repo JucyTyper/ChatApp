@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ChatApp.Migrations
 {
     /// <inheritdoc />
-    public partial class @try : Migration
+    public partial class hi : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,6 +24,40 @@ namespace ChatApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "chatEntities",
+                columns: table => new
+                {
+                    chatId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    senderEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    receiverEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    dateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    isDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    lastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_chatEntities", x => x.chatId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "messages",
+                columns: table => new
+                {
+                    messageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    chatMapId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    senderEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    receiverEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    dateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    filePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    isDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_messages", x => x.messageId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "users",
                 columns: table => new
                 {
@@ -38,6 +72,7 @@ namespace ChatApp.Migrations
                     Updated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastActive = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    isOnline = table.Column<bool>(type: "bit", nullable: false),
                     ProfileImagePath = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -51,6 +86,12 @@ namespace ChatApp.Migrations
         {
             migrationBuilder.DropTable(
                 name: "blackListTokens");
+
+            migrationBuilder.DropTable(
+                name: "chatEntities");
+
+            migrationBuilder.DropTable(
+                name: "messages");
 
             migrationBuilder.DropTable(
                 name: "users");
