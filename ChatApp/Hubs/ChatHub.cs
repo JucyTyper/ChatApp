@@ -16,6 +16,7 @@ namespace ChatApp.Hubs
     [Authorize(AuthenticationSchemes =JwtBearerDefaults.AuthenticationScheme)]
     public class ChatHub:Hub
     {
+        ResponseModel response = new ResponseModel();
         public ChatHub(ChatAppDatabase _db)
         {
             this._db = _db;
@@ -23,17 +24,6 @@ namespace ChatApp.Hubs
         private static Dictionary<string,string> userConnId= new Dictionary<string,string>();
         private readonly ChatAppDatabase _db;
 
-       /* public async Task<string> saveData(string email)
-        {
-            var con = userConnId.Where(x => x.Key == email).Select(x => x);
-            if (con.Count() == 0)
-            {
-                userConnId.Add(email, Context.ConnectionId);
-            }
-            userConnId.Remove(email);
-            userConnId.Add(email.ToLower(), Context.ConnectionId);
-            return Context.ConnectionId;
-        }*/
         public override Task OnConnectedAsync()
         {
             var httpContext = Context.GetHttpContext();
@@ -45,7 +35,7 @@ namespace ChatApp.Hubs
             userConnId.Add(email,Context.ConnectionId);
             return base.OnConnectedAsync();
         }
-        public async Task<string> SendMessage(string userEmail,string email,string msg)
+        public async Task<string> sendMessage(string email,string msg)
         {
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;
@@ -58,14 +48,16 @@ namespace ChatApp.Hubs
                 receiverEmail = email,
                 chatMapId = chatEntity.First().chatId
             };
+            chatEntity.First().lastUpdated= DateTime.Now;
             _db.messages.Add(message);
             _db.SaveChanges();
+
             var connId = userConnId.Where(x => x.Key == email).Select(x => x.Value).First();
             await Clients.Client(connId).SendAsync("receiveMessage",userEmail1, msg);
             return "Done";
         }
 
-        public async Task<string> Addchat(string userEmail,string email)
+        public async Task<string> addchat(string email)
         {
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;
@@ -83,6 +75,37 @@ namespace ChatApp.Hubs
                 return chat.chatId.ToString();
             }
             return chatEntity.First().chatId.ToString();
+        }
+        public async Task<object> chatMap()
+        {
+            var httpContext = Context.GetHttpContext();
+            var user1 = httpContext.User;
+            var userEmail = user1.FindFirst(ClaimTypes.Name)?.Value;
+            var chatMap = _db.chatEntities.Where(x => x.senderEmail == userEmail || x.receiverEmail == userEmail).Select(x => x).OrderByDescending(x => x.lastUpdated).Take(10).ToList();
+            response.IsSuccess = true;
+            response.Message = "Chat maps";
+            response.Data = chatMap;
+            return response;
+        }
+        public async Task<object> previousMessages(string MapId)
+        {
+            var prevMsg = _db.messages.Where(x => (x.chatMapId == new Guid(MapId))&&(x.isDeleted == false)).Select(x => x).OrderByDescending(x => x.dateTime).Take(10).ToList();
+            response.IsSuccess = true;
+            response.Message = "All Messages";
+            response.Data = prevMsg;
+            return response;
+        }
+        public async Task<object> getUsers()
+        {
+            var httpContext = Context.GetHttpContext();
+            var user1 = httpContext.User;
+            var userEmail = user1.FindFirst(ClaimTypes.Name)?.Value;
+            var chatMap = _db.chatEntities.Where(x => x.senderEmail == userEmail || x.receiverEmail == userEmail).Select(x => x.chatId).OrderByDescending(x => x).Take(10).ToList();
+            var userOnline = userConnId.Where(x => x.Key != userEmail).Select(x => x.Key).ToList();
+            response.IsSuccess = true;
+            response.Message = "Online Users";
+            response.Data = userOnline;
+            return response;
         }
         public override Task OnDisconnectedAsync(Exception? exception)
         {
