@@ -24,15 +24,16 @@ namespace ChatApp.Hubs
         private static Dictionary<string,string> userConnId= new Dictionary<string,string>();
         private readonly ChatAppDatabase _db;
 
-        public override Task OnConnectedAsync()
+        public async override Task<Task> OnConnectedAsync()
         {
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;
             var email = user1.FindFirst(ClaimTypes.Name)?.Value;
+            userConnId.Add(email, Context.ConnectionId);
+            await Clients.All.SendAsync("refresh");
             //var user = _db.users.Where(x => x.Email == email).Select(x=>x);
             //user.First().isOnline = true;
             //_db.SaveChanges();
-            userConnId.Add(email,Context.ConnectionId);
             return base.OnConnectedAsync();
         }
         public async Task<string> sendMessage(string email,string msg)
@@ -100,11 +101,39 @@ namespace ChatApp.Hubs
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;
             var userEmail = user1.FindFirst(ClaimTypes.Name)?.Value;
-            var chatMap = _db.chatEntities.Where(x => x.senderEmail == userEmail || x.receiverEmail == userEmail).Select(x => x.chatId).OrderByDescending(x => x).Take(10).ToList();
-            var userOnline = userConnId.Where(x => x.Key != userEmail).Select(x => x.Key).ToList();
+            var chatMap = _db.chatEntities.Where(x => x.senderEmail == userEmail || x.receiverEmail == userEmail).Select(x => x).ToList();
+            var onlineUsers = userConnId.Select(x => x.Key).ToList();
+            List<string> connEmails= new List<string>();
+            foreach (var room in chatMap)
+            {
+                if(room.senderEmail != userEmail)
+                {
+                    connEmails.Add(room.senderEmail);
+                }
+                else if (room.senderEmail == userEmail)
+                {
+                    connEmails.Add(room.receiverEmail);
+                }
+            }
+            List<RoomViewModel> users = new List<RoomViewModel>();
+            foreach (var email in connEmails)
+            {
+                var user = _db.users.Where(x=> x.Email== email).Select(x=>x).First();
+                var chatRoomId = _db.chatEntities.Where(x => (x.senderEmail == email || x.receiverEmail == email)&& (x.senderEmail == userEmail || x.receiverEmail == userEmail)).Select(x => x.chatId).ToString();
+                RoomViewModel connUser = new RoomViewModel
+                {
+                    firstName= user.FirstName,
+                    lastName= user.LastName,
+                    email= user.Email,
+                    chatRoomId = new Guid(chatRoomId)
+                };
+                if (onlineUsers.Contains(email)) { connUser.isActive = true; }
+                else { connUser.isActive = false; }
+                users.Add(connUser);
+            }
             response.IsSuccess = true;
-            response.Message = "Online Users";
-            response.Data = userOnline;
+            response.Message = "Online Users list";
+            response.Data = users ;
             return response;
         }
         public override Task OnDisconnectedAsync(Exception? exception)
