@@ -9,17 +9,26 @@ namespace ChatApp.Controllers
     [ApiController]
     public class FileController : ControllerBase
     {
-        private readonly IImageService ImageService;
+        private readonly IFileService fileService;
 
-        public FileController(IImageService Imageservice)
+        public FileController(IFileService fileservice)
         {
-            this.ImageService = Imageservice;
+            this.fileService = fileservice;
         }
         [HttpPost]
+        [Route("image")]
         [DisableRequestSizeLimit]
-        public IActionResult UploadImage(string Email, [FromForm] ImageUpload ImageFile)
+        public IActionResult uploadImage(string Email, [FromForm] fileUpload ImageFile)
         {
-            var message = ImageService.UploadImage(Email,ImageFile);
+            var message = fileService.UploadImage(Email,ImageFile);
+            return Ok(message);
+        }
+        [HttpPost]
+        [Route("file")]
+        [DisableRequestSizeLimit]
+        public IActionResult uploadFile(string Email, [FromForm] fileUpload rawFile)
+        {
+            var message = fileService.UploadFile(Email, rawFile);
             return Ok(message);
         }
     }

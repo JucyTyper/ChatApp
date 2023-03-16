@@ -13,5 +13,6 @@ namespace ChatApp.Models
         public DateTime dateTime { get; set; } = DateTime.Now;
         public string filePath { get; set; } = string.Empty;
         public bool isDeleted { get; set; } = false;
+        public int messageType { get; set; } = 1;
     }
 }

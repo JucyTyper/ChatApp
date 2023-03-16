@@ -71,7 +71,7 @@ builder.Services.AddCors(options => options.AddPolicy(name: "CorsPolicy",
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
-builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 
 var app = builder.Build();
