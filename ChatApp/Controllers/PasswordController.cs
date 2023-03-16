@@ -56,12 +56,6 @@ namespace ChatApp.Controllers
         [Route("ForgetPassword")]
         public IActionResult ForgetPasssword(ForgetPasswordMails mail)
         {
-            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            ResponseModel2 temp = passwordService.CheckToken(token);
-            if (temp.IsSuccess == false)
-            {
-                return Ok(temp);
-            }
             var response = passwordService.ForgetPassword(mail);
             return Ok(response);
         }

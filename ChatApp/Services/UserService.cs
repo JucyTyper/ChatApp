@@ -164,7 +164,7 @@ namespace ChatApp.Services
         {
             try
             {
-                var users = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) && (EF.Functions.Like(x.FirstName,"%"+searchString+"%")|| EF.Functions.Like(x.LastName, "%" + searchString + "%") || searchString == null)&&
+                var users = _db.users.Where(x => (x.UserId == id || id == Guid.Empty) && (x.IsDeleted == false) && (EF.Functions.Like(x.FirstName,"%"+searchString+"%")|| EF.Functions.Like(x.LastName, "%" + searchString + "%")|| EF.Functions.Like(x.FirstName + x.LastName, "%" + searchString + "%") || searchString == null)&&
                 (x.Email == Email || Email == null)).Select(x=> new {x.UserId,x.Email,x.FirstName,x.LastName,x.DateOfBirth,x.Created,x.LastActive,x.PhoneNo,x.Updated});
                 if (users.Count() == 0)
                 {

@@ -91,9 +91,10 @@ namespace ChatApp.Hubs
         public async Task<object> previousMessages(string MapId)
         {
             var prevMsg = _db.messages.Where(x => (x.chatMapId == new Guid(MapId))&&(x.isDeleted == false)).Select(x => x).OrderByDescending(x => x.dateTime).Take(10).ToList();
+            var revPrevMsg = prevMsg.Select(x=> x).Reverse();
             response.IsSuccess = true;
             response.Message = "All Messages";
-            response.Data = prevMsg;
+            response.Data = revPrevMsg;
             return response;
         }
         public async Task<object> getUsers()
@@ -119,13 +120,13 @@ namespace ChatApp.Hubs
             foreach (var email in connEmails)
             {
                 var user = _db.users.Where(x=> x.Email== email).Select(x=>x).First();
-                var chatRoomId = _db.chatEntities.Where(x => (x.senderEmail == email || x.receiverEmail == email)&& (x.senderEmail == userEmail || x.receiverEmail == userEmail)).Select(x => x.chatId).ToString();
+                var chatRoomId = _db.chatEntities.Where(x => (x.senderEmail == email || x.receiverEmail == email)&& (x.senderEmail == userEmail || x.receiverEmail == userEmail)).Select(x => x.chatId).ToList();
                 RoomViewModel connUser = new RoomViewModel
                 {
                     firstName= user.FirstName,
                     lastName= user.LastName,
                     email= user.Email,
-                    chatRoomId = new Guid(chatRoomId)
+                    chatRoomId = chatRoomId.First()
                 };
                 if (onlineUsers.Contains(email)) { connUser.isActive = true; }
                 else { connUser.isActive = false; }
