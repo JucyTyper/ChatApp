@@ -29,28 +29,30 @@ namespace ChatApp.Hubs
             await Clients.All.SendAsync("refresh");
             return base.OnConnectedAsync();
         }
-        public async Task<object> sendMessage(string email,string msg)
+        public async Task<object> sendMessage(string email,string msg,int type,string url)
         {
             try
             {
-                var httpContext = Context.GetHttpContext();
-                var user1 = httpContext.User;
-                var userEmail1 = user1.FindFirst(ClaimTypes.Name)?.Value;
-                var chatEntity = _db.chatEntities.Where(x => (x.senderEmail == email || x.receiverEmail == email) && (x.senderEmail == userEmail1 || x.receiverEmail == userEmail1)).Select(x => x);
-                var message = new MessageModel
-                {
-                    message = msg,
-                    senderEmail = userEmail1,
-                    receiverEmail = email,
-                    chatMapId = chatEntity.First().chatId
-                };
-                chatEntity.First().lastUpdated = DateTime.Now;
-                _db.messages.Add(message);
-                _db.SaveChanges();
+                    var httpContext = Context.GetHttpContext();
+                    var user1 = httpContext.User;
+                    var userEmail1 = user1.FindFirst(ClaimTypes.Name)?.Value;
+                    var chatEntity = _db.chatEntities.Where(x => (x.senderEmail == email || x.receiverEmail == email) && (x.senderEmail == userEmail1 || x.receiverEmail == userEmail1)).Select(x => x);
+                    var message = new MessageModel
+                    {
+                        message = msg,
+                        senderEmail = userEmail1,
+                        receiverEmail = email,
+                        type= type,
+                        fileUrl = url,
+                        chatMapId = chatEntity.First().chatId
+                    };
+                    chatEntity.First().lastUpdated = DateTime.Now;
+                    _db.messages.Add(message);
+                    _db.SaveChanges();
 
-                var connId = userConnId.Where(x => x.Key == email).Select(x => x.Value).First();
-                await Clients.Client(connId).SendAsync("receiveMessage", userEmail1, msg);
-                return response2;
+                    var connId = userConnId.Where(x => x.Key == email).Select(x => x.Value).First();
+                    await Clients.Client(connId).SendAsync("receiveMessage", userEmail1, msg,type,url);
+                    return response2;  
             }
             catch(Exception ex)
             {

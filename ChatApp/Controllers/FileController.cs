@@ -16,7 +16,7 @@ namespace ChatApp.Controllers
             this.fileService = fileservice;
         }
         [HttpPost]
-        [Route("image")]
+        [Route("Profileimage")]
         [DisableRequestSizeLimit]
         public IActionResult uploadImage(string Email, [FromForm] fileUpload ImageFile)
         {
@@ -26,9 +26,9 @@ namespace ChatApp.Controllers
         [HttpPost]
         [Route("file")]
         [DisableRequestSizeLimit]
-        public IActionResult uploadFile(string Email, [FromForm] fileUpload rawFile)
+        public IActionResult uploadFile(int type,string Email, [FromForm] fileUpload rawFile)
         {
-            var message = fileService.UploadFile(Email, rawFile);
+            var message = fileService.UploadFile(type,Email, rawFile);
             return Ok(message);
         }
     }

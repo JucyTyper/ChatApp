@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -80,6 +81,26 @@ var app = builder.Build();
 
     app.UseSwagger();
     app.UseSwaggerUI();
+
+try
+{
+    string path = Path.Combine(Directory.GetCurrentDirectory(), "Assets");
+    if (!Directory.Exists(path))
+    {
+        Directory.CreateDirectory(path);
+    }
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        //File assests = new File()
+        FileProvider = new PhysicalFileProvider(
+               Path.Combine(builder.Environment.ContentRootPath, "Assets")),
+        RequestPath = "/Assets"
+    });
+}
+catch(Exception ex)
+{
+    Console.WriteLine(ex.ToString()); 
+}
 
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
