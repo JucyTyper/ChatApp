@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /ChatApp/appsettings.json
 /ChatApp/appsettings.json
+/ChatApp/Services/UserService.cs

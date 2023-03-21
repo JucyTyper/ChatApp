@@ -7,17 +7,13 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Newtonsoft.Json.Linq;
-using Microsoft.AspNetCore.Identity;
 using System.Text.RegularExpressions;
 
 namespace ChatApp.Services
 {
     public class PasswordService : IPasswordService
     {
-        ResponseModel response = new ResponseModel();
         ResponseModel2 response2 = new ResponseModel2();
-        UserResponse DataOut = new UserResponse();
         private readonly ChatAppDatabase _db;
         private readonly IConfiguration configuration;
 
@@ -71,7 +67,7 @@ namespace ChatApp.Services
         {
 
             var hmac = new HMACSHA512(salt);
-            var passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            var passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
 
             return passwordHash;
         }
@@ -116,7 +112,7 @@ namespace ChatApp.Services
             byte[] salt = Encoding.ASCII.GetBytes(configuration.GetSection("Password:salt").Value!);
             using (var hmac = new HMACSHA512(salt))
             {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
                 return computedHash.SequenceEqual(passwordHash);
             }
         }
@@ -135,7 +131,7 @@ namespace ChatApp.Services
             UriBuilder builder = new UriBuilder(mail.urldirect);
 
             // Encode the JWT token as a URL-safe string
-            string encodedToken = System.Net.WebUtility.UrlEncode(token);
+            string encodedToken = WebUtility.UrlEncode(token);
 
             // Add the encoded JWT token as a query string parameter
             builder.Query = "token=" + encodedToken;
@@ -155,8 +151,11 @@ namespace ChatApp.Services
             // create a new SmtpClient object
             SmtpClient client = new SmtpClient();
 
+            string adminEmail = configuration.GetSection("EmailCred:Email").Value;
+            string adminPassword = configuration.GetSection("EmailCred:password").Value;
+
             // set the SMTP server credentials and port
-            client.Credentials = new NetworkCredential("ajay.joshi@chicmic.co.in", "Chicmic@2022");
+            client.Credentials = new NetworkCredential(adminEmail, adminPassword);
             client.Host = "mail.chicmic.co.in";
             client.Port = 587;
             client.EnableSsl = true;
@@ -177,7 +176,7 @@ namespace ChatApp.Services
                 new Claim(ClaimTypes.Role,role)
             };
 
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration.GetSection("jwt:Key").Value));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("jwt:Key").Value));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
             var token = new JwtSecurityToken(
                 claims: claims,

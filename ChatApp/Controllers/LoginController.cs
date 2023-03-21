@@ -1,15 +1,8 @@
 ﻿using ChatApp.Models;
-using MailKit.Security;
-using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
-using SendGrid;
-using SendGrid.Helpers.Mail;
-using System.Net.Mail;
-using System.Net;
 using ChatApp.Services;
 using Microsoft.AspNetCore.Authorization;
-using Google.Apis.Auth;
 
 namespace ChatApp.Controllers
 {

@@ -1,7 +1,6 @@
 ﻿using ChatApp.Data;
 using ChatApp.Models;
 using Google.Apis.Auth;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -75,8 +74,6 @@ namespace ChatApp.Services
                 response2.IsSuccess = false;
                 return response2;
             }
-
-
         }
         private bool VerifyPasswordHash(string password, byte[] passwordHash)
         {
@@ -111,7 +108,6 @@ namespace ChatApp.Services
             try
             {
                 var GoogleUser =  GoogleJsonWebSignature.ValidateAsync(Token);
-                //var _user = _db.users.Where(x => x.Email == GoogleUser.Email).Select(x => new {x.Email,x.UserId,x.FirstName,x.LastName});
                 var _user = _db.users.Where(x => x.Email == GoogleUser.Result.Email ).Select(x => new { x.UserId, x.Email, x.FirstName, x.LastName, x.DateOfBirth, x.Created, x.LastActive, x.PhoneNo, x.Updated });
                 
                 if (_user.Count() != 0)
@@ -153,7 +149,7 @@ namespace ChatApp.Services
             catch(Exception ex)
             {
                 response2.StatusCode = 500;
-                response2.Message = ex.StackTrace;
+                response2.Message = ex.Message;
                 response2.IsSuccess = false;
                 return response2;
             }

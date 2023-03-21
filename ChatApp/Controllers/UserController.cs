@@ -1,12 +1,10 @@
 ﻿using ChatApp.Models;
 using ChatApp.Services;
 using Google.Apis.Auth;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ChatApp.Controllers
 {
@@ -35,7 +33,7 @@ namespace ChatApp.Controllers
         }
         [HttpPut]
         [Authorize(Roles = "Login")]
-        public IActionResult UpdateUser(Guid id, string Email,UpdateUser user)
+        public IActionResult UpdateUser(Guid id,UpdateUser user)
         {
             string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             ResponseModel2 temp = userService.CheckToken(token);
@@ -43,7 +41,9 @@ namespace ChatApp.Controllers
             {
                 return Ok(temp);
             }
-            var response = userService.UpdateUser(id, Email,user);
+            var user1 = HttpContext.User;
+            var email = user1.FindFirst(ClaimTypes.Name)?.Value;
+            var response = userService.UpdateUser(id, email,user);
             return Ok(response);
         }
         [HttpDelete]

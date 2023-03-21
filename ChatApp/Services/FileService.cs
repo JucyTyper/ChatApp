@@ -1,6 +1,5 @@
 ﻿using ChatApp.Data;
 using ChatApp.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace ChatApp.Services
 {
@@ -19,7 +18,7 @@ namespace ChatApp.Services
         {
             try
             {
-                string ImageName = Email + " " + DateTime.Now.Hour + "-" + DateTime.Now.Minute + " " + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + imageFile.file.FileName;
+                string ImageName = Email + " " + DateTime.Now.Hour + "-" + DateTime.Now.Minute + " " + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year +" xtx "+ imageFile.file.FileName;
                 var folderName = "Assets//Images//";
                 var path = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 var fullpath = path + "//" + ImageName;
@@ -53,7 +52,7 @@ namespace ChatApp.Services
             {
                 string folderName;
                 string path;
-                string fileName = Email + " " + DateTime.Now.Hour + "-" + DateTime.Now.Minute + " " + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + rawFile.file.FileName;
+                string fileName = Email + " " + DateTime.Now.Hour + "-" + DateTime.Now.Minute + " " + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year+ " xtx " + rawFile.file.FileName;
                 if(type== 2)
                 {
                     folderName = "Assets//Images//"; //Path.Combine("Assets", "Images");
@@ -65,7 +64,7 @@ namespace ChatApp.Services
                     path = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 }
                 var fullpath = path + "//" + fileName; //Path.Combine(path, fileName);
-                var filestream = System.IO.File.Create(fullpath);
+                var filestream = File.Create(fullpath);
                 rawFile.file.CopyTo(filestream);
                 filestream.Close();
                 response.Message = fileName + "image uploaded successfully";
@@ -80,6 +79,5 @@ namespace ChatApp.Services
                 return response2;
             }
         }
-
     }
 }
