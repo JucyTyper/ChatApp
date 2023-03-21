@@ -293,5 +293,32 @@ namespace ChatApp.Services
             }
             return response2;
         }
+        public object GetUserProfile(string email)
+        {
+            try
+            {
+                var user = _db.users.Where(x => x.Email == email).FirstOrDefault();
+                string DOB = user.DateOfBirth.ToString().Replace('-', '/'); ;
+                var userProfile = new userProfileModel
+                {
+                    UserId = user.UserId,
+                    DateOfBirth = DOB,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    PhoneNo = user.PhoneNo,
+                    ProfileImagePath = user.ProfileImagePath,
+                };
+                response.Data = userProfile;
+                return response;
+            }
+            catch(Exception ex)
+            {
+                response2.StatusCode = 500;
+                response2.Message = ex.Message;
+                response2.IsSuccess = false;
+                return response2;
+            }
+            
+        }
     }
 }

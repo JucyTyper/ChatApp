@@ -22,7 +22,6 @@ namespace ChatApp.Services
                 var folderName = "Assets//Images//";
                 var path = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 var fullpath = path + "//" + ImageName;
-                //string path = "C:\\Users\\ChicMic\\source\\repos\\ChatApp\\ChatApp\\Assets\\";
                 var filestream = System.IO.File.Create(fullpath);
                 imageFile.file.CopyTo(filestream);
                 filestream.Close();
@@ -55,7 +54,7 @@ namespace ChatApp.Services
                 string fileName = Email + " " + DateTime.Now.Hour + "-" + DateTime.Now.Minute + " " + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year+ " xtx " + rawFile.file.FileName;
                 if(type== 2)
                 {
-                    folderName = "Assets//Images//"; //Path.Combine("Assets", "Images");
+                    folderName = "Assets//Images//";
                     path = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 }
                 else
@@ -63,12 +62,12 @@ namespace ChatApp.Services
                     folderName = "Assets//Files//";
                     path = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 }
-                var fullpath = path + "//" + fileName; //Path.Combine(path, fileName);
+                var fullpath = path + "//" + fileName; 
                 var filestream = File.Create(fullpath);
                 rawFile.file.CopyTo(filestream);
                 filestream.Close();
                 response.Message = fileName + "image uploaded successfully";
-                response.Data = folderName  + fileName;// Path.Combine(folderName, fileName);
+                response.Data = folderName  + fileName;
                 return response;
             }
             catch (Exception ex)

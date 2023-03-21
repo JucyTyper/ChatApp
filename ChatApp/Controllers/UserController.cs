@@ -31,6 +31,22 @@ namespace ChatApp.Controllers
             var response = userService.GetUser(id,searchString,Email);
             return Ok(response);
         }
+        [HttpGet]
+        [Route("profile")]
+        [Authorize(Roles = "Login")]
+        public IActionResult GetUserProfile()
+        {
+            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            ResponseModel2 temp = userService.CheckToken(token);
+            if (temp.IsSuccess == false)
+            {
+                return Ok(temp);
+            }
+            var user = HttpContext.User;
+            var email = user.FindFirst(ClaimTypes.Name)?.Value;
+            var response = userService.GetUserProfile(email);
+            return Ok(response);
+        }
         [HttpPut]
         [Authorize(Roles = "Login")]
         public IActionResult UpdateUser(Guid id,UpdateUser user)

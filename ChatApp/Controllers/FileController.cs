@@ -10,7 +10,6 @@ namespace ChatApp.Controllers
     public class FileController : ControllerBase
     {
         private readonly IFileService fileService;
-
         public FileController(IFileService fileservice)
         {
             this.fileService = fileservice;

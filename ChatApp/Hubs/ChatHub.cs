@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 
 namespace ChatApp.Hubs
@@ -30,7 +31,7 @@ namespace ChatApp.Hubs
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;
             var email = user1.FindFirst(ClaimTypes.Name)?.Value;
-            //adding email and connectionId in connected person list
+            //adding email and connectionId in connected person dictionary
             userConnId.Add(email, Context.ConnectionId);
             //Sending everyone a message to refresh
             await Clients.All.SendAsync("refresh");
@@ -168,9 +169,12 @@ namespace ChatApp.Hubs
                 var httpContext = Context.GetHttpContext();
                 var user1 = httpContext.User;
                 var userEmail = user1.FindFirst(ClaimTypes.Name)?.Value;
+                //getting all chat rooms of user
                 var chatMap = _db.chatEntities.Where(x => x.senderEmail == userEmail || x.receiverEmail == userEmail).Select(x => x).OrderByDescending(x => x.lastUpdated).ToList();
+                //getting all online users
                 var onlineUsers = userConnId.Select(x => x.Key).ToList();
                 List<string> connEmails = new List<string>();
+                //getting emails of all receivers
                 foreach (var room in chatMap)
                 {
                     if (room.senderEmail != userEmail)
@@ -183,6 +187,7 @@ namespace ChatApp.Hubs
                     }
                 }
                 List<RoomViewModel> users = new List<RoomViewModel>();
+                //now  for each receiver email creating an object with name ,chatId and active status
                 foreach (var email in connEmails)
                 {
                     var user = _db.users.Where(x => x.Email == email).Select(x => x).First();
@@ -198,6 +203,7 @@ namespace ChatApp.Hubs
                     else { connUser.isActive = false; }
                     users.Add(connUser);
                 }
+                //Generating response
                 response.IsSuccess = true;
                 response.Message = "Online Users list";
                 response.Data = users;
@@ -212,11 +218,14 @@ namespace ChatApp.Hubs
             }
             
         }
+        //overring a function 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
+            //getting Email
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;
             var email = user1.FindFirst(ClaimTypes.Name)?.Value;
+            //removing email mrom the connId dictionary
             userConnId.Remove(email);
             return base.OnDisconnectedAsync(exception);
         }
