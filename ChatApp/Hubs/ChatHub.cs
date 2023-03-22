@@ -3,9 +3,7 @@ using ChatApp.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using System.ComponentModel;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 
 namespace ChatApp.Hubs
@@ -27,10 +25,12 @@ namespace ChatApp.Hubs
         //overriding a function from baseclass
         public async override Task<Task> OnConnectedAsync()
         {
+            //await Clients.All.SendAsync("checkkk");
             //getting email from token
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;
             var email = user1.FindFirst(ClaimTypes.Name)?.Value;
+            //await Clients.All.SendAsync("checkkk--------->>");
             //adding email and connectionId in connected person dictionary
             userConnId.Add(email, Context.ConnectionId);
             //Sending everyone a message to refresh
@@ -38,7 +38,7 @@ namespace ChatApp.Hubs
             return base.OnConnectedAsync();
         }
         // a function to send messages
-        public async Task<object> sendMessage(string email,string msg,int type,string url)
+        public async Task<object> sendMessage(string email,string msg,int type,string url,string fileName)
         {
             try
             {
@@ -58,7 +58,8 @@ namespace ChatApp.Hubs
                     receiverEmail = email,
                     type = type,
                     fileUrl = url,
-                    chatMapId = chatEntity.First().chatId
+                    chatMapId = chatEntity.First().chatId,
+                    fileName= fileName
                 };
                 //Adding message object to the database
                 _db.messages.Add(message);
@@ -215,8 +216,7 @@ namespace ChatApp.Hubs
                 response2.Message = ex.Message;
                 response2.IsSuccess = false;
                 return response2;
-            }
-            
+            } 
         }
         //overring a function 
         public override Task OnDisconnectedAsync(Exception? exception)

@@ -22,7 +22,7 @@ namespace ChatApp.Services
                 var folderName = "Assets//Images//";
                 var path = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 var fullpath = path + "//" + ImageName;
-                var filestream = System.IO.File.Create(fullpath);
+                var filestream = File.Create(fullpath);
                 imageFile.file.CopyTo(filestream);
                 filestream.Close();
                 var _user = _db.users.Where(x => (x.Email == Email)).Select(x => x);
@@ -32,10 +32,12 @@ namespace ChatApp.Services
                     response.Message = "User Not Found";
                     return response;
                 }
-                _user.First().ProfileImagePath = fullpath;
-                response2.Message = "image successfullu uploaded" ;
-                response2.IsSuccess = true;
-                return response2;
+                _user.First().ProfileImagePath = folderName + ImageName;
+                _db.SaveChanges();
+                response.Message = "image successfullu uploaded" ;
+                response.IsSuccess = true;
+                response.Data = folderName + ImageName;
+                return response;
             }
             catch(Exception ex)
             {
@@ -66,8 +68,13 @@ namespace ChatApp.Services
                 var filestream = File.Create(fullpath);
                 rawFile.file.CopyTo(filestream);
                 filestream.Close();
+                var fileResponse = new FileResponseModel
+                {
+                    fileName= rawFile.file.FileName,
+                    filePath= folderName + fileName
+                };
                 response.Message = fileName + "image uploaded successfully";
-                response.Data = folderName  + fileName;
+                response.Data = fileResponse;
                 return response;
             }
             catch (Exception ex)

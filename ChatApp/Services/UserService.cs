@@ -3,6 +3,7 @@ using ChatApp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
+using MimeKit;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -298,9 +299,10 @@ namespace ChatApp.Services
             try
             {
                 var user = _db.users.Where(x => x.Email == email).FirstOrDefault();
-                string DOB = user.DateOfBirth.ToString().Replace('-', '/'); ;
+                string DOB = user.DateOfBirth.ToString("yyyy-MM-dd").Split(" ").First();
                 var userProfile = new userProfileModel
                 {
+                    Email= email,
                     UserId = user.UserId,
                     DateOfBirth = DOB,
                     FirstName = user.FirstName,

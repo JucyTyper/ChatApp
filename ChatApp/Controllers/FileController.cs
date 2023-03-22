@@ -1,7 +1,10 @@
 ﻿using ChatApp.Models;
 using ChatApp.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
+using System.Security.Claims;
 
 namespace ChatApp.Controllers
 {
@@ -16,10 +19,13 @@ namespace ChatApp.Controllers
         }
         [HttpPost]
         [Route("Profileimage")]
+        [Authorize(Roles = "Login")]
         [DisableRequestSizeLimit]
-        public IActionResult uploadImage(string Email, [FromForm] fileUpload ImageFile)
+        public IActionResult uploadImage( [FromForm] fileUpload ImageFile)
         {
-            var message = fileService.UploadImage(Email,ImageFile);
+            var user1 = HttpContext.User;
+            var email = user1.FindFirst(ClaimTypes.Name)?.Value;
+            var message = fileService.UploadImage(email,ImageFile);
             return Ok(message);
         }
         [HttpPost]
