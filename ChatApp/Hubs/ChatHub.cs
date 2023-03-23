@@ -15,21 +15,25 @@ namespace ChatApp.Hubs
         ResponseModel response = new ResponseModel();
         ResponseModel2 response2 = new ResponseModel2();
         // calling constructor and adding database
-        public ChatHub(ChatAppDatabase _db)
+        public ChatHub(ChatAppDatabase _db,ILogger<string> logger)
         {
             this._db = _db;
+            this.logger = logger;
         }
         private static Dictionary<string,string> userConnId= new Dictionary<string,string>();
         private readonly ChatAppDatabase _db;
+        private readonly ILogger<string> logger;
 
         //overriding a function from baseclass
         public async override Task<Task> OnConnectedAsync()
         {
+            
             //await Clients.All.SendAsync("checkkk");
             //getting email from token
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;
             var email = user1.FindFirst(ClaimTypes.Name)?.Value;
+            //logger.LogInformation(email+ " "+Context.ConnectionId + " User connected");
             //await Clients.All.SendAsync("checkkk--------->>");
             //adding email and connectionId in connected person dictionary
             userConnId.Add(email, Context.ConnectionId);
@@ -42,6 +46,7 @@ namespace ChatApp.Hubs
         {
             try
             {
+                logger.LogInformation(email + " " + Context.ConnectionId + " SendMessage Method called");
                 //getting email from token
                 var httpContext = Context.GetHttpContext();
                 var user1 = httpContext.User;
@@ -83,6 +88,7 @@ namespace ChatApp.Hubs
             }
             catch(Exception ex)
             {
+                logger.LogWarning("error in SendMessages function " + ex.Message);
                 response2.StatusCode = 500;
                 response2.Message = ex.Message;
                 response2.IsSuccess = false;
@@ -96,6 +102,7 @@ namespace ChatApp.Hubs
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;
             var userEmail1 = user1.FindFirst(ClaimTypes.Name)?.Value;
+            logger.LogInformation(userEmail1 + " " + Context.ConnectionId + " Addchat method called");
             //Getting chatentity of the sender and receiver
             var chatEntity = _db.chatEntities.Where(x => (x.senderEmail == email || x.receiverEmail == email) && (x.senderEmail == userEmail1 || x.receiverEmail == userEmail1)).Select(x => x);
             //Checking if chatroom exist or not ,if not then creating a new one 
@@ -123,6 +130,7 @@ namespace ChatApp.Hubs
                 var httpContext = Context.GetHttpContext();
                 var user1 = httpContext.User;
                 var userEmail = user1.FindFirst(ClaimTypes.Name)?.Value;
+                logger.LogInformation(userEmail + " " + Context.ConnectionId + " Addchat method called");
                 //Getting All Chatrooms
                 var chatMap = _db.chatEntities.Where(x => x.senderEmail == userEmail || x.receiverEmail == userEmail).Select(x => x).OrderByDescending(x => x.lastUpdated).Take(10).ToList();
                 //Generating response
@@ -133,6 +141,7 @@ namespace ChatApp.Hubs
             }
             catch (Exception ex)
             {
+                logger.LogWarning("error in chatMap function " + ex.Message);
                 response2.StatusCode = 500;
                 response2.Message = ex.Message;
                 response2.IsSuccess = false;
@@ -143,6 +152,7 @@ namespace ChatApp.Hubs
         {
             try
             {
+                logger.LogInformation(Context.ConnectionId + " GetMessages method called");
                 //getting messages
                 var prevMsg = _db.messages.Where(x => (x.chatMapId == new Guid(MapId)) && (x.isDeleted == false)).Select(x => x).OrderByDescending(x => x.dateTime).Skip((pageNumber-1)*20).Take(20).ToList();
                 //reversing order of the messages
@@ -155,6 +165,7 @@ namespace ChatApp.Hubs
             }
             catch (Exception ex)
             {
+                logger.LogWarning("error in previous messages function " + ex.Message);
                 response2.StatusCode = 500;
                 response2.Message = ex.Message;
                 response2.IsSuccess = false;
@@ -170,6 +181,7 @@ namespace ChatApp.Hubs
                 var httpContext = Context.GetHttpContext();
                 var user1 = httpContext.User;
                 var userEmail = user1.FindFirst(ClaimTypes.Name)?.Value;
+                logger.LogInformation(userEmail + " " + Context.ConnectionId + " getUser method called");
                 //getting all chat rooms of user
                 var chatMap = _db.chatEntities.Where(x => x.senderEmail == userEmail || x.receiverEmail == userEmail).Select(x => x).OrderByDescending(x => x.lastUpdated).ToList();
                 //getting all online users
@@ -198,7 +210,9 @@ namespace ChatApp.Hubs
                         firstName = user.FirstName,
                         lastName = user.LastName,
                         email = user.Email,
-                        chatRoomId = chatRoomId.First()
+                        chatRoomId = chatRoomId.First(),
+                        ProfileImagePath= user.ProfileImagePath,
+
                     };
                     if (onlineUsers.Contains(email)) { connUser.isActive = true; }
                     else { connUser.isActive = false; }
@@ -212,6 +226,7 @@ namespace ChatApp.Hubs
             }
             catch (Exception ex)
             {
+                logger.LogWarning("error in getusers function " + ex.Message);
                 response2.StatusCode = 500;
                 response2.Message = ex.Message;
                 response2.IsSuccess = false;
@@ -221,6 +236,7 @@ namespace ChatApp.Hubs
         //overring a function 
         public override Task OnDisconnectedAsync(Exception? exception)
         {
+
             //getting Email
             var httpContext = Context.GetHttpContext();
             var user1 = httpContext.User;

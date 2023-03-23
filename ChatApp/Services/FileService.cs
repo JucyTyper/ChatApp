@@ -18,7 +18,7 @@ namespace ChatApp.Services
         {
             try
             {
-                string ImageName = Email + " " + DateTime.Now.Hour + "-" + DateTime.Now.Minute + " " + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year +" xtx "+ imageFile.file.FileName;
+                string ImageName = Email + "_" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "_" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year +"_xtx_"+ imageFile.file.FileName;
                 var folderName = "Assets//Images//";
                 var path = Path.Combine(Directory.GetCurrentDirectory(), folderName);
                 var fullpath = path + "//" + ImageName;
@@ -53,7 +53,7 @@ namespace ChatApp.Services
             {
                 string folderName;
                 string path;
-                string fileName = Email + " " + DateTime.Now.Hour + "-" + DateTime.Now.Minute + " " + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year+ " xtx " + rawFile.file.FileName;
+                string fileName = Email + "_" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "_" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year+ "_xtx_" + rawFile.file.FileName;
                 if(type== 2)
                 {
                     folderName = "Assets//Images//";

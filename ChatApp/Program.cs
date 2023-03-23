@@ -12,6 +12,9 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
+builder.Logging.ClearProviders();
+builder.Logging.AddLog4Net();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
